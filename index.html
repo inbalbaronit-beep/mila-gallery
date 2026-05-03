@@ -1,0 +1,933 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mila Baron — Mixed Media Artist</title>
+
+<!--
+═══════════════════════════════════════════════════════════════════════
+  MILA BARON — LIVE ARTWORK CATALOG
+  Single-file site. All content is configured in the CONFIG block below.
+═══════════════════════════════════════════════════════════════════════
+
+  HOW TO ADD OR REPLACE AN ARTWORK IMAGE
+  --------------------------------------
+  Place the image file (JPG or PNG) inside the /images folder.
+  In the ARTWORKS array, make sure 'filename' matches exactly
+  (e.g. filename: 'lady-in-blue.jpg'). That's it.
+
+  HOW TO EDIT ARTWORK DETAILS
+  ---------------------------
+  Find the artwork in the ARTWORKS array and edit the value.
+  Example: change title: 'alcoholic' to title: 'new-title'.
+
+  HOW TO ADD A NEW ARTWORK
+  ------------------------
+  Copy any existing entry in the ARTWORKS array, paste it
+  as a new entry, update the details, drop the image in /images.
+
+  HOW TO REMOVE AN ARTWORK
+  ------------------------
+  Delete its entry from the ARTWORKS array.
+  The image file in /images can stay, it just won't show.
+
+  HOW TO UPDATE CONTACT INFO
+  --------------------------
+  At the top of the config block, update EMAIL, WHATSAPP_NUMBER,
+  or INSTAGRAM_URL. These feed every contact link on the page.
+
+  HOW TO UPDATE THE BIO TEXT
+  --------------------------
+  Find BIO_TEXT in the config block and rewrite it.
+
+  HOW TO REORDER ARTWORKS
+  -----------------------
+  Cut and paste entries in the ARTWORKS array.
+  The order in the array is the order on the page (latest first).
+═══════════════════════════════════════════════════════════════════════
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Satoshi is not on Google Fonts; load from Fontshare CDN. -->
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@500,700,900&display=swap" rel="stylesheet">
+
+<style>
+  /* ─── reset ─── */
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Satoshi', system-ui, sans-serif;
+    background: #ffffff;
+    color: #000000;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+  img { display: block; max-width: 100%; }
+
+  /* ─── type tokens ─── */
+  .t-body {
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0.5px;
+  }
+  .t-link {
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0.5px;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    cursor: pointer;
+  }
+  .t-display {
+    font-weight: 900;
+    letter-spacing: -0.06em;
+    line-height: 0.85;
+  }
+
+  /* ─── intro overlay ─── */
+  #intro {
+    position: fixed; inset: 0;
+    background: #000;
+    z-index: 9999;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+  #intro .intro-text {
+    color: #fff;
+    font-weight: 500;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+    opacity: 0;
+    transition: opacity 400ms ease;
+    position: absolute;
+  }
+  #intro .intro-text.show { opacity: 1; }
+  #intro .iris {
+    position: absolute;
+    width: 0; height: 0;
+    border-radius: 50%;
+    background: #fff;
+    transform: translate(-50%, -50%);
+    left: 50%; top: 50%;
+    transition: width 600ms ease-in-out, height 600ms ease-in-out;
+  }
+  #intro.done { pointer-events: none; }
+
+  /* ─── hero ─── */
+  .hero {
+    width: 100%;
+    padding: 56px 40px 28px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  .hero-name {
+    font-weight: 900;
+    /* Tracking scales with the font so it never overflows on tiny screens or
+       leaves a gap on giant ones. ~ -0.06em ≈ the original -12.4px at ~206px. */
+    letter-spacing: -0.06em;
+    line-height: 0.82;
+    /* Fluid scale tuned for the 10-char string "MILA BARON" so it fills the
+       hero padding box (40px each side on desktop, 20-28px on mobile) without
+       clipping at any viewport. */
+    font-size: clamp(56px, 18vw, 320px);
+    white-space: nowrap;
+    margin: 0;
+    text-transform: uppercase;
+  }
+  .hero-foot {
+    margin-top: 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .hero-bio { max-width: 520px; margin: 0 0 16px; }
+  .hero-bio-col { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; max-width: 520px; }
+  .hero-about-link { display: inline-block; }
+  .hero-links {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+
+  /* Filler cells for partial last row — keep the grid line continuous. */
+  .cell-filler { cursor: default; pointer-events: none; }
+
+  /* ─── grid ─── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    /* Background line color shows through the gaps between cells, giving
+       us a continuous bottom rule even on partial rows. */
+    background: #e0e0e0;
+    gap: 1px;
+    border-top: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  .cell {
+    position: relative;
+    background: #ffffff;
+    color: #000000;
+    cursor: pointer;
+    isolation: isolate;
+    /* Fixed, uniform cell height. Adjusts on smaller screens below. */
+    height: 640px;
+  }
+  /* Card matches mastak.framer.website hover spec.
+     Rest:  border-radius 0%
+     Hover: border-radius 8%   (everything else stays put)
+     Layout uses absolute positioning so the image and text sit at exact
+     percentage anchors regardless of the cell aspect. */
+  .cell-card {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    background: #ffffff;
+    border-radius: 0%;
+    overflow: hidden;
+    transition: border-radius 300ms ease;
+  }
+  .cell:hover .cell-card {
+    border-radius: 8%;
+  }
+  /* Image sits centered, 60% wide, with the natural top/bottom gap that
+     produces the 18% breathing room described in the spec. */
+  .cell-img-wrap {
+    position: absolute;
+    left: 50%;
+    top: 18%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 64%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cell-img-wrap img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+  }
+  .cell-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #f1f1f1;
+    display: grid;
+    place-items: center;
+    color: #888;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+  }
+  /* Title pinned at 91% from card top, subtitle at 95%. */
+  .cell-title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 91%;
+    transform: translateY(-50%);
+    text-align: center;
+    font-family: 'Satoshi', system-ui, sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 1;
+    letter-spacing: 0.48px;
+    color: rgb(0, 0, 0);
+    margin: 0;
+    padding: 0;
+  }
+  .cell-sub-slot {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 95%;
+    transform: translateY(-50%);
+    display: grid;
+    grid-template-areas: "slot";
+    text-align: center;
+  }
+  .cell-sub,
+  .cell-sub-hover {
+    grid-area: slot;
+    font-family: 'Satoshi', system-ui, sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 1;
+    letter-spacing: 0.48px;
+    transition: opacity 300ms ease, color 300ms ease;
+  }
+  .cell-sub        { color: rgba(0, 0, 0, 0.6); opacity: 1; }
+  .cell-sub-hover  { color: rgba(0, 0, 0, 0.6); opacity: 0; }
+  .cell:hover .cell-sub       { opacity: 0; }
+  .cell:hover .cell-sub-hover { opacity: 1; }
+
+  /* Sold pill — shown in grid cell + detail overlay above the title. */
+  .sold-pill {
+    display: inline-block;
+    background: #e63946;
+    color: #ffffff;
+    font-family: 'Satoshi', system-ui, sans-serif;
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    padding: 4px 10px;
+  }
+  /* Sold pill — sits 8px above the cell title (which is at top: 91%). */
+  .cell-sold {
+    position: absolute;
+    left: 0;
+    right: 0;
+    /* title is centered on 91%, font-size 16px → top edge ≈ 91% - 8px.
+       place pill bottom 8px above that. */
+    top: calc(91% - 16px);
+    transform: translateY(-100%);
+    text-align: center;
+    pointer-events: none;
+    margin-bottom: 8px;
+  }
+  /* Small line below the SOLD pill, used in both grid cells + detail overlay. */
+  .sold-note {
+    margin-top: 10px;
+    font-family: 'Satoshi', system-ui, sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1.4;
+    letter-spacing: 0.04em;
+    color: rgba(0, 0, 0, 0.6);
+  }
+  /* In the detail overlay it stacks naturally above the title. */
+  .detail-sold { margin: 32px 0 0; }
+
+  /* ─── footer ─── */
+  footer {
+    background: #000;
+    color: #fff;
+    padding: 120px 40px 32px;
+    text-align: center;
+  }
+  .footer-headline {
+    font-weight: 900;
+    letter-spacing: -8.4px;
+    line-height: 0.85;
+    font-size: clamp(48px, 9.4vw, 168px);
+    margin: 0 auto;
+    max-width: 1400px;
+    text-transform: uppercase;
+  }
+  .footer-links {
+    margin-top: 64px;
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+  .footer-copy {
+    margin-top: 96px;
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    color: #fff;
+  }
+
+  /* ─── about overlay ─── */
+  #about {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 8500;
+    display: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  #about.open { display: block; }
+
+  /* Massive name behind the panel — same Satoshi Black treatment as the
+     homepage hero, full-bleed and visible on either side of the centered panel. */
+  .about-bg-name {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Satoshi', system-ui, sans-serif;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: -0.069em;
+    line-height: 0.85;
+    font-size: clamp(72px, 18vw, 220px);
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+    text-transform: uppercase;
+  }
+  .about-close {
+    position: absolute;
+    top: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 48px;
+    height: 48px;
+    background: transparent;
+    border: 0;
+    color: #ffffff;
+    cursor: pointer;
+    z-index: 8600;
+    display: grid;
+    place-items: center;
+    padding: 0;
+  }
+  .about-panel {
+    position: relative;
+    z-index: 8550;
+    width: 640px;
+    max-width: calc(100% - 40px);
+    margin: 96px auto 96px;
+    padding: 32px;
+    background: #ffffff;
+    box-sizing: border-box;
+  }
+  .about-photo-wrap {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+  }
+  .about-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .about-photo-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #d8d8d8;
+    color: #6a6a6a;
+    display: grid;
+    place-items: center;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+  }
+  .about-bio {
+    margin: 32px 0 32px;
+    font-family: 'Satoshi', system-ui, sans-serif;
+    font-weight: 500;
+    font-size: 28.8px;
+    line-height: 43.2px;
+    letter-spacing: 0.864px;
+    color: #000000;
+  }
+  .about-divider { height: 1px; width: 100%; background: #000000; }
+  @media (max-width: 700px) {
+    .about-panel { padding: 20px; margin: 80px auto 64px; }
+    .about-bio { font-size: 20px; line-height: 32px; letter-spacing: 0.6px; margin: 24px 0; }
+    .about-close { top: 16px; }
+  }
+
+  /* ─── detail overlay ─── */
+  #detail {
+    position: fixed; inset: 0;
+    background: #fff;
+    z-index: 8000;
+    display: none;
+    overflow-y: auto;
+    opacity: 0;
+    transition: opacity 300ms ease;
+  }
+  #detail.open { display: block; opacity: 1; }
+  .detail-close {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: 0.5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #000;
+    z-index: 8100;
+    padding: 8px 14px;
+    font-family: inherit;
+  }
+  .detail-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 96px 40px 96px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transform: scale(0.95);
+    opacity: 0;
+    transition: transform 300ms ease-out, opacity 300ms ease-out;
+    transform-origin: center center;
+  }
+  #detail.open .detail-inner {
+    transform: scale(1);
+    opacity: 1;
+  }
+  .detail-img-wrap {
+    width: 100%;
+    height: 78vh;
+    display: grid;
+    place-items: center;
+  }
+  .detail-img-wrap img {
+    max-height: 78vh;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+  .detail-title {
+    margin-top: 40px;
+    font-weight: 500;
+    font-size: 22px;
+    letter-spacing: 0.3px;
+  }
+  .detail-meta {
+    margin-top: 8px;
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    color: #9a9a9a;
+  }
+  .detail-note {
+    margin-top: 56px;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    color: #6a6a6a;
+  }
+  .detail-links {
+    margin-top: 18px;
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* ─── inline copied tooltip on the Email link ─── */
+  .copied-tip {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background: #000;
+    color: #fff;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    padding: 6px 10px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 200ms ease, transform 200ms ease;
+    text-decoration: none;
+  }
+  .copied-tip.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .copied-tip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #000;
+  }
+  /* parent of the tooltip needs to be a positioning context */
+  .t-link { position: relative; }
+
+  /* ─── toast (legacy, hidden) ─── */
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%) translateY(20px);
+    background: #000;
+    color: #fff;
+    padding: 12px 18px;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 220ms ease, transform 220ms ease;
+    z-index: 9500;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ─── responsive ─── */
+  @media (max-width: 1100px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+    .cell { height: 540px; }
+    .hero { padding: 40px 28px 24px; }
+    /* tracking now em-based, no override needed */
+    footer { padding: 80px 28px 28px; }
+    .footer-headline { letter-spacing: -5px; }
+  }
+  @media (max-width: 640px) {
+    .grid { grid-template-columns: 1fr; }
+    .cell { height: 480px; }
+    .hero { padding: 32px 20px 20px; }
+    .hero-name { font-size: 19vw; }
+    .hero-foot { margin-top: 40px; }
+    .hero-links { gap: 20px; }
+    footer { padding: 64px 20px 24px; }
+    .footer-headline { letter-spacing: -3px; font-size: 14vw; }
+    .footer-links { gap: 20px; }
+    .detail-inner { padding: 80px 20px 64px; }
+    .detail-close { top: 14px; font-size: 20px; }
+    .detail-img-wrap { height: 72vh; }
+    .detail-img-wrap img { max-height: 72vh; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     INTRO OVERLAY (black screen → name → role → iris wipe)
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="intro" aria-hidden="true">
+  <div class="iris"></div>
+  <div class="intro-text" data-slot="1">Mila Baron</div>
+  <div class="intro-text" data-slot="2">Mixed Media Artist</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     HERO
+     ═══════════════════════════════════════════════════════════════ -->
+<header class="hero">
+  <h1 class="hero-name" id="hero-name">MILA BARON</h1>
+  <div class="hero-foot">
+    <div class="hero-bio-col">
+      <p class="t-body hero-bio" id="hero-bio"></p>
+      <a class="t-link hero-about-link" href="#" id="about-link">More about me</a>
+    </div>
+    <nav class="hero-links" id="hero-links"></nav>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     GRID
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="grid" id="grid"></section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     FOOTER
+     ═══════════════════════════════════════════════════════════════ -->
+<footer>
+  <h2 class="footer-headline">WANT TO COLLAB?<br>REACH OUT!</h2>
+  <nav class="footer-links" id="footer-links"></nav>
+  <div class="footer-copy">©2026 Mila Baron. All rights reserved.</div>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     ABOUT OVERLAY (full-screen, black bg with name behind a centered panel)
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="about" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="about-bg-name" id="about-bg-name">MILA BARON</div>
+  <button class="about-close" id="about-close" aria-label="Close">
+    <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+      <path d="M3 3 L17 17 M17 3 L3 17" stroke="currentColor" stroke-width="2" stroke-linecap="square" fill="none"/>
+    </svg>
+  </button>
+  <div class="about-panel" id="about-panel">
+    <div class="about-photo-wrap">
+      <img class="about-photo" id="about-photo" alt="Mila Baron"
+           onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'about-photo-placeholder',textContent:'mila-photo.jpg'}))">
+    </div>
+    <p class="about-bio" id="about-bio"></p>
+    <div class="about-divider"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     DETAIL OVERLAY
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="detail" role="dialog" aria-modal="true" aria-hidden="true">
+  <button class="detail-close" id="detail-close" aria-label="Close">X</button>
+  <div class="detail-inner" id="detail-inner"></div>
+</div>
+
+<!-- toast retained for any future global notification need; not used for email copy -->
+<div id="toast" role="status" aria-live="polite" hidden>Copied</div>
+
+<!-- Embedded base64 artwork (the-rabbit, sumo-boys) so they render
+     without depending on the /images folder. Loaded before the main script. -->
+<script src="embedded-artwork.js"></script>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   CONFIG — single source of truth. Edit only here.
+   ═══════════════════════════════════════════════════════════════════ */
+const CONFIG = {
+  EMAIL: 'milabaron13@gmail.com',          // never displayed; copied to clipboard
+  WHATSAPP_NUMBER: '972503114112',         // international format (Israel: 972, drop the leading 0)
+  INSTAGRAM_URL: 'https://www.instagram.com/mila.baron.13/',
+  BIO_TEXT: 'Mila Baron is an Israeli artist and illustrator who brings fantasy and horror to life through bold character designs and surreal, emotionally rich landscapes, blending reality with imagination through vibrant colors and dynamic storytelling.',
+  ABOUT_BIO_TEXT: "Hi, I'm Mila, an Israeli artist and illustrator who brings fantasy and horror to life through bold character designs and surreal, emotionally rich landscapes, blending reality with imagination through vibrant colors and dynamic storytelling.",
+  MILA_PHOTO: 'images/mila-photo.jpg',
+};
+
+/* Latest first. Each entry: { title, filename, medium, size, year } */
+const ARTWORKS = [
+  { title: 'post-war-arak',                  filename: 'the-rabbit.jpg',                     medium: 'Mix Media', size: '210x297mm', year: 2026 },
+  { title: 'shiny-chained',                  filename: 'sumo-boys.jpg',                      medium: 'Mix Media', size: '210x297mm', year: 2026 },
+  { title: 'they-say-lemons-cure-diseases',  filename: 'they-say-lemons-cure-diseases.jpg',  medium: 'Mix Media', size: '210x297mm', year: 2026, sold: true },
+  { title: 'is-my-cat-suppose-to-be-like-that', filename: 'is-my-cat-suppose-to-be-like-that.jpg', medium: 'Mix Media', size: '210x297mm', year: 2026 },
+  { title: 'just-trying-to-bathe',           filename: 'just-trying-to-bathe.jpg',           medium: 'Mix Media', size: '210x297mm', year: 2026 },
+  { title: 'alcoholic',                      filename: 'alcoholic.jpg',                      medium: 'Mix Media', size: '210x297mm', year: 2026 },
+  { title: 'lady-in-blue',                   filename: 'lady-in-blue.jpg',                   medium: 'Mix Media', size: '210x297mm', year: 2026 },
+];
+/* ═══════════════════════════════════════════════════════════════════
+   END CONFIG
+   ═══════════════════════════════════════════════════════════════════ */
+
+(function () {
+  'use strict';
+
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+  /* ─── inline copied tooltip ─── */
+  function showCopiedTooltip(anchorEl) {
+    if (!anchorEl) return;
+    // Remove any existing tooltip first
+    document.querySelectorAll('.copied-tip').forEach(n => n.remove());
+    const tip = document.createElement('span');
+    tip.className = 'copied-tip';
+    tip.textContent = 'Copied!';
+    anchorEl.appendChild(tip);
+    // Force reflow then add the visible class for the transition
+    requestAnimationFrame(() => tip.classList.add('show'));
+    setTimeout(() => {
+      tip.classList.remove('show');
+      setTimeout(() => tip.remove(), 220);
+    }, 1000);
+  }
+
+  function copyEmail(e) {
+    const anchorEl = e && e.currentTarget;
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    const txt = CONFIG.EMAIL;
+    const onSuccess = () => showCopiedTooltip(anchorEl);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(onSuccess, fallback);
+    } else fallback();
+    function fallback() {
+      const ta = document.createElement('textarea');
+      ta.value = txt; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); onSuccess(); } catch (_) {}
+      document.body.removeChild(ta);
+    }
+    return false;
+  }
+
+  function buildContactLinks(target) {
+    target.innerHTML = '';
+    const mk = (label, href, onclick) => {
+      const a = document.createElement('a');
+      a.className = 't-link';
+      a.textContent = label;
+      a.href = href || '#';
+      if (onclick) a.addEventListener('click', onclick);
+      else { a.target = '_blank'; a.rel = 'noopener noreferrer'; }
+      return a;
+    };
+    target.appendChild(mk('Email', '#', copyEmail));
+    target.appendChild(mk('Instagram', CONFIG.INSTAGRAM_URL));
+    target.appendChild(mk('WhatsApp', 'https://wa.me/' + CONFIG.WHATSAPP_NUMBER.replace(/\D/g, '')));
+  }
+
+  /* ─── render ─── */
+  $('#hero-bio').textContent = CONFIG.BIO_TEXT;
+  buildContactLinks($('#hero-links'));
+  buildContactLinks($('#footer-links'));
+
+  /* ─── about overlay ─── */
+  $('#about-bio').textContent = CONFIG.ABOUT_BIO_TEXT;
+  $('#about-photo').src = CONFIG.MILA_PHOTO;
+  const aboutEl = $('#about');
+  function openAbout() {
+    aboutEl.classList.add('open');
+    aboutEl.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    aboutEl.scrollTop = 0;
+  }
+  function closeAbout() {
+    aboutEl.classList.remove('open');
+    aboutEl.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+  $('#about-link').addEventListener('click', (e) => {
+    e.preventDefault();
+    openAbout();
+  });
+  $('#about-close').addEventListener('click', (e) => {
+    e.preventDefault();
+    closeAbout();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && aboutEl.classList.contains('open')) closeAbout();
+  });
+
+  /* Guarantee the hero name never overflows: measure after layout and the
+     fonts have loaded, then trim font-size if needed. */
+  function fitHeroName() {
+    const hero = $('.hero');
+    const name = $('#hero-name');
+    if (!hero || !name) return;
+    name.style.fontSize = ''; // reset so clamp() can take over again
+    const heroStyles = getComputedStyle(hero);
+    const padX = parseFloat(heroStyles.paddingLeft) + parseFloat(heroStyles.paddingRight);
+    const available = hero.clientWidth - padX;
+    let current = parseFloat(getComputedStyle(name).fontSize);
+    let guard = 24;
+    while (name.scrollWidth > available && current > 12 && guard-- > 0) {
+      current *= available / name.scrollWidth * 0.995;
+      name.style.fontSize = current + 'px';
+    }
+  }
+  window.addEventListener('resize', fitHeroName);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitHeroName);
+  fitHeroName();
+
+  /* Resolve an artwork's image src: prefer embedded base64 if available,
+     otherwise fall back to the /images folder path. */
+  function imgSrc(filename) {
+    const embedded = (window.__EMBEDDED_ARTWORK || {})[filename];
+    return embedded || ('images/' + filename);
+  }
+
+  const gridEl = $('#grid');
+  ARTWORKS.forEach((art, i) => {
+    const cell = document.createElement('article');
+    cell.className = 'cell';
+    cell.dataset.idx = i;
+    cell.innerHTML = `
+      <div class="cell-card">
+        <div class="cell-img-wrap">
+          <img alt="${art.title}" loading="lazy"
+               src="${imgSrc(art.filename)}"
+               onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'cell-placeholder',textContent:'image coming soon'}))">
+        </div>
+        <div class="cell-title">${art.title}</div>
+        ${art.sold ? '<div class="cell-sold"><span class="sold-pill">Sold</span></div>' : ''}
+        <div class="cell-sub-slot">
+          <div class="cell-sub">${art.medium} · ${art.size}</div>
+          <div class="cell-sub-hover">view artwork</div>
+        </div>
+      </div>`;
+    cell.addEventListener('click', () => openDetail(i));
+    gridEl.appendChild(cell);
+  });
+
+  /* Pad the last row with empty filler cells so the bottom rule is continuous
+     and the grid line is unbroken across columns the artworks don't fill. */
+  function fillLastRow() {
+    // Remove any existing fillers first
+    gridEl.querySelectorAll('.cell-filler').forEach(n => n.remove());
+    const cols = (window.matchMedia('(max-width: 640px)').matches) ? 1
+               : (window.matchMedia('(max-width: 1100px)').matches) ? 2
+               : 3;
+    const remainder = ARTWORKS.length % cols;
+    const missing = remainder === 0 ? 0 : cols - remainder;
+    for (let k = 0; k < missing; k++) {
+      const f = document.createElement('div');
+      f.className = 'cell cell-filler';
+      f.setAttribute('aria-hidden', 'true');
+      gridEl.appendChild(f);
+    }
+  }
+  fillLastRow();
+  window.addEventListener('resize', fillLastRow);
+
+  /* ─── detail overlay ─── */
+  const detail = $('#detail');
+  const detailInner = $('#detail-inner');
+
+  function openDetail(i) {
+    const art = ARTWORKS[i];
+    detailInner.innerHTML = `
+      <div class="detail-img-wrap">
+        <img alt="${art.title}" src="${imgSrc(art.filename)}"
+             onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'cell-placeholder',style:'width:60vw;height:70vh',textContent:'image coming soon'}))">
+      </div>
+      ${art.sold ? '<div class="detail-sold"><span class="sold-pill">Sold</span><div class="sold-note">Although the original was sold, you can order prints</div></div>' : ''}
+      <div class="detail-title">${art.title}</div>
+      <div class="detail-meta">${art.medium} · ${art.size} · ${art.year}</div>
+      <div class="detail-note">For collaborations, reach out below</div>
+      <nav class="detail-links" id="detail-links"></nav>
+    `;
+    buildContactLinks($('#detail-links'));
+    detail.classList.add('open');
+    detail.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDetail() {
+    detail.classList.remove('open');
+    detail.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+  $('#detail-close').addEventListener('click', closeDetail);
+  detail.addEventListener('click', (e) => {
+    // close when clicking outside the inner content / image
+    if (e.target === detail) closeDetail();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && detail.classList.contains('open')) closeDetail();
+  });
+
+  /* ─── intro animation ─── */
+  function runIntro() {
+    const intro = $('#intro');
+    const slot1 = intro.querySelector('[data-slot="1"]');
+    const slot2 = intro.querySelector('[data-slot="2"]');
+    const iris = intro.querySelector('.iris');
+
+    // 1. fade in name
+    setTimeout(() => slot1.classList.add('show'), 120);
+    // 2. fade out name, fade in role (~1s after fade-in completes)
+    setTimeout(() => slot1.classList.remove('show'), 1200);
+    setTimeout(() => slot2.classList.add('show'), 1600);
+    // 3. fade out role
+    setTimeout(() => slot2.classList.remove('show'), 2600);
+    // 4. iris wipe
+    setTimeout(() => {
+      const d = Math.hypot(window.innerWidth, window.innerHeight) * 1.2;
+      iris.style.width = d + 'px';
+      iris.style.height = d + 'px';
+    }, 2700);
+    // 5. remove intro
+    setTimeout(() => {
+      intro.classList.add('done');
+      intro.style.display = 'none';
+    }, 3400);
+  }
+  // Run on load. First click anywhere also skips it.
+  if (document.readyState === 'complete') runIntro();
+  else window.addEventListener('load', runIntro);
+})();
+</script>
+</body>
+</html>
